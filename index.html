@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Internship Recommender — Guided</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: "Poppins", sans-serif; margin:0; padding:0; background:#f4f7fa; }
+    .language-selector { position: fixed; top: 20px; right: 20px; z-index: 1000; }
+    .language-selector select { 
+      padding: 8px 12px; 
+      border: 1px solid #ddd; 
+      border-radius: 8px; 
+      background: white; 
+      font-family: "Poppins", sans-serif; 
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .header { text-align:center; padding:1.5rem; background:#4a90e2; color:#fff; }
+    .header h1 { margin:0; font-size:1.8rem; }
+    .header p { margin:0.5rem 0 0; font-weight:300; }
+    .container { max-width:1100px; margin:2rem auto; padding:0 1rem; }
+    .card { background:#fff; border-radius:12px; padding:2rem; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:2rem; }
+    .form-card { border-top:6px solid #4a90e2; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+    .form-group { display:flex; flex-direction:column; }
+    .form-group label { font-weight:500; margin-bottom:0.3rem; display:flex; align-items:center; }
+    .form-group label .icon { margin-right:0.4rem; }
+    .form-group input, .form-group select { padding:0.7rem 1rem; border:1px solid #ddd; border-radius:8px; font-size:0.95rem; }
+    .input-with-mic { display:flex; align-items:center; }
+    .input-with-mic input { flex:1; }
+    .input-with-mic button { margin-left:0.5rem; border:none; background:#4a90e2; color:#fff; border-radius:50%; width:38px; height:38px; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; }
+    .actions { margin-top:1rem; display:flex; gap:1rem; }
+    .btn { padding:0.7rem 1.2rem; border:none; border-radius:8px; font-size:0.95rem; cursor:pointer; }
+    .btn:hover { opacity:0.9; }
+    .btn.apply { background:#4a90e2; color:#fff; }
+    .btn.ghost { background:#f4f7fa; border:1px solid #ddd; }
+    .results-card { border-top:6px solid #2ecc71; }
+    .user-summary { margin:1rem 0; padding:1rem; border-radius:8px; background:#f0f8ff; font-size:0.9rem; line-height:1.4; }
+    .intern-card { display:flex; justify-content:space-between; border:1px solid #eee; padding:1rem; border-radius:10px; margin-bottom:1rem; }
+    .intern-card.top { border:2px solid #4a90e2; background:#f9fcff; }
+    .logo-wrap { display:flex; align-items:center; }
+    .logo { width:48px; height:48px; object-fit:contain; margin-right:1rem; }
+    .logo.fallback { background:#4a90e2; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:1.2rem; }
+    .star { color:#e67e22; font-weight:600; margin-left:0.5rem; }
+    .skills { margin:0.5rem 0; }
+    .chip { display:inline-block; background:#eef3f8; padding:0.3rem 0.6rem; margin:0.2rem; border-radius:6px; font-size:0.8rem; }
+    .match-percentage { margin-top:0.5rem; }
+    .match-percentage .bar { background:#eee; border-radius:6px; height:8px; width:100%; overflow:hidden; }
+    .match-percentage .fill { height:100%; border-radius:6px; }
+    .footer { text-align:center; padding:1rem; background:#f1f1f1; font-size:0.85rem; color:#555; }
+    .modal { position:fixed; inset:0; display:none; justify-content:center; align-items:center; background:rgba(0,0,0,0.6); }
+    .modal.open { display:flex; }
+    .modal-card { background:#fff; padding:2rem; border-radius:12px; text-align:center; width:300px; }
+    .modal-card button { margin:0.5rem; padding:0.5rem 1rem; border:none; border-radius:8px; cursor:pointer; background:#4a90e2; color:#fff; }
+    .loading { text-align:center; padding:2rem; color:#666; }
+    .error { background:#fee; color:#c33; padding:1rem; border-radius:8px; margin:1rem 0; }
+    .empty { text-align:center; padding:2rem; color:#666; }
+    .why { margin:0.5rem 0; font-style:italic; color:#555; }
+    .career-tip { margin:0.5rem 0; background:#fff8dc; padding:0.5rem; border-radius:4px; font-size:0.9rem; }
+    .career-path { margin:0.5rem 0; color:#4a90e2; font-weight:500; }
+    .badge { background:#e8f4fd; color:#1976d2; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem; margin-right:0.5rem; }
+    .card-left { flex:2; }
+    .card-right { flex:1; text-align:right; }
+    .main h3 { margin:0 0 0.5rem; color:#333; }
+    .company { color:#666; margin:0 0 0.5rem; }
+    .meta { margin:0.5rem 0; }
+    .summary-card { background:#fff; padding:1rem; border-radius:8px; border-left:4px solid #4a90e2; }
+    .summary-card div { margin:0.3rem 0; }
+    
+    @media (max-width: 768px) {
+      .form-grid { grid-template-columns:1fr; }
+      .intern-card { flex-direction:column; }
+      .card-right { text-align:left; margin-top:1rem; }
+      .language-selector { position:static; text-align:center; padding:1rem; }
+    }
+  </style>
+</head>
+<body>
+<!-- Language Selector at the top -->
+<div class="language-selector">
+  <select id="language-select">
+    <option value="en">English</option>
+    <option value="hi">हिन्दी</option>
+    <option value="te">తెలుగు</option>
+    <option value="ta">தமிழ்</option>
+  </select>
+</div>
+
+<div id="lang-modal" class="modal">
+  <div class="modal-card">
+    <h2>Select language / भाषा चुनें</h2>
+    <div class="lang-list">
+      <button data-lang="en">English</button>
+      <button data-lang="hi">हिन्दी</button>
+      <button data-lang="te">తెలుగు</button>
+      <button data-lang="ta">தமிழ்</button>
+    </div>
+    <p class="small">Your language choice will be saved.</p>
+  </div>
+</div>
+
+<header class="header">
+  <h1 id="title">Internship Recommendation Portal</h1>
+  <p id="subtitle">Fill your details → Get top 5 matches with reasons ✨</p>
+</header>
+
+<main class="container">
+
+  <!-- ✅ Profile Form -->
+  <section class="card form-card">
+    <h2 id="form-heading">Your Profile</h2>
+    <form id="rec-form" enctype="multipart/form-data">
+      <input type="hidden" name="language" id="language" value="en">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label><span class="icon">👤</span><span class="lbl" data-key="name">Name</span></label>
+          <input type="text" name="name" placeholder="Your name" required/>
+        </div>
+
+        <div class="form-group">
+          <label><span class="icon">🏫</span><span class="lbl" data-key="college_name">College Name</span></label>
+          <div class="input-with-mic">
+            <input type="text" name="college_name" placeholder="ABC Engineering College"/>
+            <button type="button" class="mic" data-target="college_name">🎤</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><span class="icon">📍</span><span class="lbl" data-key="college_area">College Area</span></label>
+          <div class="input-with-mic">
+            <input type="text" name="college_area" placeholder="Hyderabad, Telangana"/>
+            <button type="button" class="mic" data-target="college_area">🎤</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><span class="icon">🎓</span><span class="lbl" data-key="graduation_year">Graduated Year</span></label>
+          <select name="graduation_year">
+            <option value="2024">2024</option>
+            <option value="2025">2023</option>
+            <option value="2026">2022</option>
+            <option value="2027">2021</option>
+            <option value="2028">2020</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label><span class="icon">🛠️</span><span class="lbl" data-key="skills">Skills</span></label>
+          <div class="input-with-mic">
+            <input type="text" name="skills" placeholder="Python, SQL, React" required/>
+            <button type="button" class="mic" data-target="skills">🎤</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><span class="icon">💡</span><span class="lbl" data-key="interests">Interests</span></label>
+          <div class="input-with-mic">
+            <input type="text" name="interests" placeholder="Data, Marketing"/>
+            <button type="button" class="mic" data-target="interests">🎤</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><span class="icon">📍</span><span class="lbl" data-key="location">Preferred Location</span></label>
+          <div class="input-with-mic">
+            <input type="text" name="preferred_location" placeholder="Hyderabad / Remote"/>
+            <button type="button" class="mic" data-target="preferred_location">🎤</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><span class="icon">💰</span><span class="lbl" data-key="stipend">Stipend Expected (₹)</span></label>
+          <input type="number" name="stipend_expected" placeholder="8000"/>
+        </div>
+
+        <div class="form-group">
+          <label><span class="icon">📄</span><span class="lbl" data-key="resume">Resume Upload</span></label>
+          <input type="file" name="resume" accept=".pdf,.doc,.docx"/>
+        </div>
+
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn apply" id="submit-btn">Get Top 5 Recommendations</button>
+        <button type="reset" class="btn ghost">Reset</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card results-card">
+    <div class="results-header">
+      <h2 id="results-heading">Top 5 Recommendations</h2>
+      <div id="user-summary" class="user-summary"></div>
+    </div>
+    <div id="results" class="results"></div>
+  </section>
+</main>
+
+<footer class="footer">
+  <span id="footer-text">Built for fast, explainable matching • Career guidance included</span>
+</footer>
+
+<script>
+  const TRANSLATIONS = {
+  en:{
+    title:"Internship Recommendation Portal",
+    subtitle:"Fill your details → Get top 5 matches with reasons ✨",
+    form_heading:"Your Profile",
+    name:"Name",
+    college_name:"College Name",
+    college_area:"College Area",
+    graduation_year:"Graduation Year",
+    skills:"Skills (comma separated)",
+    interests:"Interests (comma separated)",
+    location:"Preferred Location",
+    stipend:"Stipend Expected (₹)",
+    resume:"Resume Upload (pdf/doc/docx)",
+    submit:"Get Top 5 Recommendations",
+    results_heading:"Top 5 Recommendations",
+    no_matches:"No exact matches. Here are alternative opportunities.",
+    apply_now:"Apply Now",
+    best_match:"Best Match",
+    match_percentage:"Match Percentage"
+  },
+  hi:{
+    title:"इंटर्नशिप सिफारिश पोर्टल",
+    subtitle:"अपनी जानकारी भरें → शीर्ष 5 मेल देखें ✨",
+    form_heading:"आपकी प्रोफ़ाइल",
+    name:"नाम",
+    college_name:"कॉलेज का नाम",
+    college_area:"कॉलेज का क्षेत्र",
+    graduation_year:"स्नातक वर्ष",
+    skills:"कौशल (अल्पविराम से अलग)",
+    interests:"रुचियाँ (अल्पविराम से अलग)",
+    location:"पसंदीदा स्थान",
+    stipend:"अपेक्षित वेतन (₹)",
+    resume:"रिज़्यूमे अपलोड (pdf/doc/docx)",
+    submit:"शीर्ष 5 सिफारिशें प्राप्त करें",
+    results_heading:"शीर्ष 5 सिफारिशें",
+    no_matches:"कोई सटीक मिलान नहीं। वैकल्पिक अवसर यहां दिए गए हैं।",
+    apply_now:"अब आवेदन करें",
+    best_match:"सर्वश्रेष्ठ मिलान",
+    match_percentage:"मिलान प्रतिशत"
+  },
+  te:{
+    title:"ఇంటర్న్షిప్ సిఫారీస్ పోర్టల్",
+    subtitle:"మీ వివరాలు పూరించండి → టాప్ 5 మ్యాచ్‌లు పొందండి ✨",
+    form_heading:"మీ ప్రొఫైల్",
+    name:"పేరు",
+    college_name:"కాలేజీ పేరు",
+    college_area:"కాలేజీ ప్రాంతం",
+    graduation_year:"గ్రాడ్యుయేషన్ సంవత్సరం",
+    skills:"నైపుణ్యాలు (కామా విడదీయబడిన)",
+    interests:"ఆసక్తులు (కామా విడదీయబడిన)",
+    location:"ఆసక్తి స్థలం",
+    stipend:"సహాయం ఆశించండి (₹)",
+    resume:"రిజ్యూమ్ అప్లోడ్ (pdf/doc/docx)",
+    submit:"టాప్ 5 సిఫారీస్ పొందండి",
+    results_heading:"టాప్ 5 సిఫారీస్",
+    no_matches:"సరిగ్గా సరిపోకపోవచ్చు. ప్రత్యామ్నాయ అవకాశాలు.",
+    apply_now:"దరఖాస్తు చేయండి",
+    best_match:"ఉత్తమ మ్యాచ్",
+    match_percentage:"మ్యాచ్ పర్సెంటేజ్"
+  },
+  ta:{
+    title:"இன்டர்ன்ஷிப் பரிந்துரை போர்டல்",
+    subtitle:"உங்கள் விவரங்களை பூர்த்தி செய்யவும் → சரியான 5 பொருந்துதல்களை பெறுங்கள் ✨",
+    form_heading:"உங்கள் پროஃபைல்",
+    name:"பெயர்",
+    college_name:"கல்லூரி பெயர்",
+    college_area:"கல்லூரி பகுதி",
+    graduation_year:"பட்டமளிப்பு ஆண்டு",
+    skills:"திறன்கள் (காமாவால் பிரிக்கவும்)",
+    interests:"விருப்பங்கள் (காமா பிரித்தல்)",
+    location:"விரும்பிய இடம்",
+    stipend:"சம்பளம் எதிர்பார்ப்பு (₹)",
+    resume:"ரெசுமே பதிவேற்றம் (pdf/doc/docx)",
+    submit:"அதிக 5 பரிந்துரைகளைப் பெறவும்",
+    results_heading:"உத்தம 5 பரிந்துரைகள்",
+    no_matches:"துல்லியமாக பொருந்தவில்லை. மாற்று வாய்ப்புகள் இங்கே.",
+    apply_now:"இப்போது பயன்படு",
+    best_match:"சிறந்த பொருத்தம்",
+    match_percentage:"பொருத்த சதவீதம்"
+  }
+};
+
+  function t(lang,key){return TRANSLATIONS[lang]&&TRANSLATIONS[lang][key]?TRANSLATIONS[lang][key]:TRANSLATIONS['en'][key];}
+  const modal=document.getElementById('lang-modal');const langInput=document.getElementById('language');const langBtns=document.querySelectorAll('.lang-list button');
+  const langSelect = document.getElementById('language-select');
+
+  function showModal(){const saved=localStorage.getItem('preferred_lang'); if(!saved) modal.classList.add('open'); else applyLanguage(saved);}
+  function applyLanguage(lang){
+    localStorage.setItem('preferred_lang',lang); 
+    langInput.value=lang;
+    langSelect.value=lang;
+    
+    document.getElementById('title').innerText=t(lang,'title');
+    document.getElementById('subtitle').innerText=t(lang,'subtitle');
+    document.getElementById('form-heading').innerText=t(lang,'form_heading');
+    document.getElementById('results-heading').innerText=t(lang,'results_heading');
+    document.getElementById('submit-btn').innerText=t(lang,'submit');
+    document.getElementById('footer-text').innerText=t(lang,'title')+' • Career guidance included';
+    document.querySelectorAll('.lbl').forEach(el=>{const k=el.getAttribute('data-key'); el.innerText=t(lang,k)});
+    modal.classList.remove('open');
+  }
+  
+  langBtns.forEach(b=>b.addEventListener('click',()=>applyLanguage(b.dataset.lang)));
+  langSelect.addEventListener('change', (e) => applyLanguage(e.target.value));
+
+  // ✅ Fix mic buttons
+  document.querySelectorAll('.mic').forEach(btn=>btn.addEventListener('click',()=>{
+    const target=btn.dataset.target;
+    const input=document.querySelector(`[name="${target}"]`);
+    if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)){
+      alert('Speech recognition not supported. Use Chrome/Edge.');
+      return;
+    }
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    const r=new SR();
+    r.lang=(localStorage.getItem('preferred_lang')==='hi')?'hi-IN':
+            (localStorage.getItem('preferred_lang')==='te')?'te-IN':
+            (localStorage.getItem('preferred_lang')==='ta')?'ta-IN':'en-IN';
+    r.interimResults=false;
+    r.onresult=e=>{const txt=e.results[0][0].transcript; input.value=input.value?input.value+', '+txt:txt};
+    r.start();
+  }));
+
+  const form=document.getElementById('rec-form'); const resultsEl=document.getElementById('results'); const userSummary=document.getElementById('user-summary');
+  function confColor(p){if(p>=80) return 'green'; if(p>=50) return 'orange'; return 'red';}
+  function makeCard(item,i,lang){
+    const top=i===0;
+    const logo=item.company_logo_url||'';
+    const logoHtml=logo?`<img class="logo" src="${logo}" alt="${item.company} logo" onerror="this.style.display='none'">`:`<div class="logo fallback">${item.company.charAt(0)||''}</div>`;
+    const skills=item.required_skills.split(',').map(s=>s.trim());
+    const matchPercentage = Math.round(item.match_percentage || item.score * 100);
+    return `<article class="intern-card ${top?'top':''}">
+      <div class="card-left"><div class="logo-wrap">${logoHtml}${top?'<div class="star">⭐ '+t(lang,'best_match')+'</div>':''}</div>
+      <div class="main"><h3>${item.title}</h3><p class="company">${item.company} • ${item.location}</p>
+      <div class="meta">${item.duration?'<span class="badge">'+item.duration+'</span>':''} <span class="badge">₹${item.stipend}</span></div>
+      <div class="why">${item.why||''}</div>
+      <div class="career-tip">💡 ${item.career_tip||''}</div>
+      <div class="career-path">🪜 Next: <strong>${item.career_path||''}</strong></div></div></div>
+      <div class="card-right"><div class="skills">${skills.map(s=>`<span class="chip">${s}</span>`).join('')}</div>
+      <div class="match-percentage"><div class="label">${t(lang,'match_percentage')}: ${matchPercentage}%</div><div class="bar"><div class="fill" style="width:${matchPercentage}%;background:${confColor(matchPercentage)}"></div></div></div>
+      <div class="actions"><a class="btn apply" href="${item.apply_link||'#'}" target="_blank">${t(lang,'apply_now')}</a></div></div>
+    </article>`;
+  }
+
+  form.addEventListener('submit',async e=>{
+    e.preventDefault(); resultsEl.innerHTML='<div class="loading">Finding your best matches…</div>'; userSummary.innerHTML='';
+    const fd=new FormData(form);
+    try{const res=await fetch('/api/recommend',{method:'POST',body:fd}); const data=await res.json();
+      if(!res.ok){resultsEl.innerHTML=`<div class="error">${data.error||'Server error'}</div>`; return;}
+      const u=data.user||{}; const lang=u.language||localStorage.getItem('preferred_lang')||'en';
+      userSummary.innerHTML=`<div class="summary-card"><div><strong>${u.name||'User'}</strong></div><div>College: <em>${u.college_name||'-'}</em>, ${u.college_area||'-'}</div><div>Graduation: <em>${u.graduation_year||'-'}</em></div><div>Skills: <em>${u.skills||'-'}</em></div><div>Interests: <em>${u.interests||'-'}</em></div><div>Pref: <em>${u.preferred_location||'-'}</em> • Expected: <em>₹${u.stipend_expected||'NA'}</em></div></div>`;
+      const items=data.results||[];
+      if(items.length===0){resultsEl.innerHTML=`<div class="empty">${t(lang,'no_matches')}</div>`; return;}
+      resultsEl.innerHTML=items.map((it,i)=>makeCard(it,i,lang)).join('');
+      const top=items[0]; if(top){ const ut=new SpeechSynthesisUtterance(); const langCode=(lang==='hi')?'hi-IN':(lang==='te')?'te-IN':(lang==='ta')?'ta-IN':'en-IN'; ut.lang=langCode; ut.text=`${t(lang,'best_match')}. ${top.title} at ${top.company}, ${top.location}. Stipend ${top.stipend} rupees.`; speechSynthesis.cancel(); speechSynthesis.speak(ut);} 
+    }catch(err){resultsEl.innerHTML=`<div class="error">Error: ${err.message||err}</div>`;}
+  });
+
+  window.addEventListener('load',()=>showModal());
+</script>
+</body>
+</html>
